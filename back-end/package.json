@@ -8,11 +8,11 @@
     "dev": "nodemon src/server.ts",
     "build": "tsc",
     "dev:test": "dotenv -e .env.test nodemon src/server.ts",
-		"test:integration": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- --testPathPattern=tests/integrations -i --coverage",
-		"test:unit": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- --testPathPattern=tests/unit -i --coverage",
-		"test": "dotenv -e .env.test prisma migrate dev && NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage",
-		"reset:db": "prisma migrate reset",
-		"reset:db:dev": "dotenv -e .env.test prisma migrate reset"
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- --testPathPattern=tests/integrations -i --coverage",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- --testPathPattern=tests/unit -i --coverage",
+    "test": "dotenv -e .env.test prisma migrate dev && NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage",
+    "reset:db": "prisma migrate reset",
+    "reset:db:dev": "dotenv -e .env.test prisma migrate reset"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -40,11 +40,13 @@
   },
   "dependencies": {
     "@prisma/client": "^3.13.0",
+    "@types/lodash": "^4.14.182",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "joi": "^17.4.1",
+    "lodash": "^4.17.21",
     "react-player": "^2.10.0"
   }
 }

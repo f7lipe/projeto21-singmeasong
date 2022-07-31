@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import _ from 'lodash';
 import { recommendationRepository } from "../../src/repositories/recommendationRepository.js";
 import { recommendationService } from "../../src/services/recommendationsService.js"
 import { jest } from "@jest/globals";
@@ -124,6 +125,20 @@ describe("Unit tests", ()=>{
     })
 
     describe("Get", ()=>{
+		it('should call function findAll', async () => {
+			const recommendations = await Promise.all(
+				_.times(5, async () => {
+					return await recommendationFactory.createRecomendation();
+				})
+			);
+			const spy = jest
+				.spyOn(recommendationRepository, 'findAll')
+				.mockImplementationOnce((): any => recommendations);
+
+			const result = await recommendationService.get();
+			expect(spy).toHaveBeenCalled();
+			expect(result).toEqual(recommendations);
+		});
     })
 
     describe("Get top 10", ()=>{
