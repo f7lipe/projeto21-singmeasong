@@ -142,7 +142,21 @@ describe("Unit tests", ()=>{
     })
 
     describe("Get top 10", ()=>{
-    
+        it('should call function getAmountByScore', async () => {
+			const amount = faker.datatype.number({ min: 1 });
+			const recommendations = await Promise.all(
+				_.times(10, async () => {
+					return await recommendationFactory.createRecomendation();
+				})
+			);
+			const spy = jest
+				.spyOn(recommendationRepository, 'getAmountByScore')
+				.mockImplementationOnce((): any => recommendations);
+
+			const result = await recommendationService.getTop(amount);
+			expect(spy).toHaveBeenCalledWith(amount);
+			expect(result).not.toBeNull();
+		});
     })
 
     describe("Get by id", ()=>{
