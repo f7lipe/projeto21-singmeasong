@@ -71,6 +71,56 @@ describe("Unit tests", ()=>{
     })
 
     describe("Downvote", ()=>{
+        it("should downvote recommendation", async ()=>{
+            const recommendation = await recommendationFactory.createRecomendation();
+            const spy = jest
+                        .spyOn(recommendationRepository, 'find')
+                        .mockImplementationOnce((): any => recommendation);
+            jest.spyOn(recommendationRepository,'updateScore')
+                        .mockImplementationOnce((): any => {
+                            return {
+                                ...recommendation,
+                                score: recommendation.score - 1
+                            }
+                        });
+            await recommendationService.downvote(recommendation.id);
+            expect(spy).toBeCalledWith(recommendation.id);
+        })
+
+        it("should call function update score with decrement params in repository", async ()=>{
+            const recommendation = await recommendationFactory.createRecomendation();
+            jest.spyOn(recommendationRepository, 'find')
+                        .mockImplementationOnce((): any => recommendation);
+            const spy = jest.spyOn(recommendationRepository,'updateScore')
+                        .mockImplementationOnce((): any => {
+                            return {
+                                ...recommendation,
+                                score: recommendation.score - 1
+                            }
+                        });
+            await recommendationService.downvote(recommendation.id);
+            expect(spy).toBeCalledWith(recommendation.id, 'decrement');
+        })
+
+        it('should call function delete recommendation when update recommendation with score to set lowest than -5', async () => {
+			const recommendation = await recommendationFactory.createRecomendation({score: -6});
+			jest.spyOn(recommendationRepository, 'find').mockImplementationOnce(
+				(): any => recommendation
+			);
+			jest.spyOn(
+				recommendationRepository,
+				'updateScore'
+			).mockImplementationOnce((): any => {
+				return { ...recommendation, score: recommendation.score - 1 };
+			});
+			const spy = jest
+				.spyOn(recommendationRepository, 'remove')
+				.mockImplementationOnce((): any => {});
+
+			await recommendationService.downvote(recommendation.id);
+			expect(spy).toBeCalledWith(recommendation.id);
+		});
+
     })
 
     describe("Get", ()=>{
