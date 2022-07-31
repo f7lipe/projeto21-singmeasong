@@ -33,19 +33,16 @@ describe("Unit tests", ()=>{
             expect(spy).toBeCalledWith(recommendation.name);
         })
 
-        it("should throw error if name is already taken", async ()=>{
-            const recommendation = await recommendationFactory.createRecomendation();
-            jest.spyOn(recommendationRepository, 'findByName')
-                        .mockResolvedValueOnce(recommendation);
-            jest.spyOn(recommendationRepository,'create')
-                        .mockImplementationOnce((): any => {});
-           const insertion = await recommendationService.insert(recommendation)
-           expect(insertion).rejects.toEqual({
-            type: "conflict",
-            message: "Recommendations names must be unique"
-           })
-
-        })
+		it('should throw error when name already exists', async () => {
+			const recommendation = await recommendationFactory.createRecomendation();
+			jest.spyOn(recommendationRepository,'findByName').mockResolvedValueOnce(recommendation);
+			jest.spyOn(recommendationRepository,'create').mockImplementationOnce((): any => {});
+			const result = recommendationService.insert(recommendation);
+			expect(result).rejects.toEqual({
+				type: 'conflict',
+				message: 'Recommendations names must be unique',
+			});
+		});
     })
 
     describe("Upvote", ()=>{
@@ -61,13 +58,13 @@ describe("Unit tests", ()=>{
         })
 
         it("should throw error if recommendation does not exist", async ()=>{
-            jest.spyOn(recommendationRepository, 'find')
-                        .mockImplementationOnce((): any => {});
-            jest.spyOn(recommendationRepository,'updateScore')
-                        .mockImplementationOnce((): any => {});
-            const fakeId = faker.datatype.number({max: 0});
-            const upvote = await recommendationService.upvote(fakeId);
-            expect(upvote).rejects.toEqual({ type: 'not_found', message: '' });
+            const id = faker.datatype.number({ max: 0 });
+			jest.spyOn(recommendationRepository, 'find').mockImplementationOnce(
+				(): any => {}
+			);
+			jest.spyOn(recommendationRepository,'updateScore').mockImplementationOnce((): any => {});
+			const result = recommendationService.upvote(id);
+			expect(result).rejects.toEqual({ type: 'not_found', message: '' });
         })
     })
 
