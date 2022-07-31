@@ -124,7 +124,7 @@ describe("Unit tests", ()=>{
 
     })
 
-    describe("Get", ()=>{
+    describe("Get all", ()=>{
 		it('should call function findAll', async () => {
 			const recommendations = await Promise.all(
 				_.times(5, async () => {
@@ -189,7 +189,115 @@ describe("Unit tests", ()=>{
     })
 
     describe("Get randomic", ()=>{
+
+        it('should call findAll with gt into score filter when a randomic number is less than 0.7', async () => {
+			const recommendations = await Promise.all(
+				_.times(5, async () => {
+					return await recommendationFactory.createRecomendation();
+				})
+			);
+			const spy = jest
+				.spyOn(recommendationRepository, 'findAll')
+				.mockImplementationOnce((): any => recommendations);
+
+			jest.spyOn(Math, 'random').mockReturnValue(0.6);
+
+			await recommendationService.getRandom();
+			expect(spy).toHaveBeenCalledWith({ score: 10, scoreFilter: 'gt' });
+		});
+
+        it('should call findAll with gt into score filter when a randomic number is grater than 0.7', async () => {
+			const recommendations = await Promise.all(
+				_.times(5, async () => {
+					return await recommendationFactory.createRecomendation();
+				})
+			);
+			const spy = jest
+				.spyOn(recommendationRepository, 'findAll')
+				.mockImplementationOnce((): any => recommendations);
+
+			jest.spyOn(Math, 'random').mockReturnValue(0.8);
+
+			await recommendationService.getRandom();
+			expect(spy).toHaveBeenCalledWith({ score: 10, scoreFilter: 'lte' });
+		});
+
+        it('should call findAll with random value for Math.random', async () => {
+			const recommendations = await Promise.all(
+				_.times(5, async () => {
+					return await recommendationFactory.createRecomendation();
+				})
+			);
+			const spy = jest
+				.spyOn(recommendationRepository, 'findAll')
+				.mockImplementationOnce((): any => recommendations);
+
+			jest.spyOn(Math, 'random').mockReturnValue(
+				faker.datatype.float({ min: 0, max: 1 })
+			);
+
+			await recommendationService.getRandom();
+			expect(spy).toHaveBeenCalledWith({
+				score: 10,
+				scoreFilter: expect.stringMatching(/^(gt|lte)$/),
+			});
+		});
+
+        it('should call findAll twice when does not exist recommendations scoring bigger 10', async () => {
+			const recommendations = await Promise.all(
+				_.times(5, async () => {
+					return await recommendationFactory.createRecomendation({
+						score: faker.datatype.number({ min: 0, max: 9 }),
+					});
+				})
+			);
+			const spy = jest
+				.spyOn(recommendationRepository, 'findAll')
+				.mockImplementationOnce((): any => [])
+				.mockImplementationOnce((): any => recommendations);
+
+			jest.spyOn(Math, 'random').mockReturnValue(
+				faker.datatype.float({ min: 0, max: 1 })
+			);
+
+			await recommendationService.getRandom();
+			expect(spy).toHaveBeenCalledTimes(2);
+		});
+
+        it('should throw notFoundError when does not exists recommendations', async () => {
+			const spy = jest
+				.spyOn(recommendationRepository, 'findAll')
+				.mockResolvedValue([]);
+
+			jest.spyOn(Math, 'random').mockReturnValue(
+				faker.datatype.float({ min: 0, max: 1 })
+			);
+
+			const result = recommendationService.getRandom();
+			expect(result).rejects.toEqual({ type: 'not_found', message: '' });
+		});
+
+        it('should get a random recommendation', async () => {
+			const recommendations = await Promise.all(
+				_.times(10, async () => {
+					return await recommendationFactory.createRecomendation();
+				})
+			);
+			const spy = jest
+				.spyOn(recommendationRepository, 'findAll')
+				.mockResolvedValue(recommendations);
+
+			jest.spyOn(Math, 'random').mockReturnValue(
+				faker.datatype.float({ min: 0, max: 1 })
+			);
+			const floor = faker.datatype.number({ min: 0, max: 10 });
+			jest.spyOn(Math, 'floor').mockReturnValue(floor);
+
+			const result = await recommendationService.getRandom();
+			expect(result).toEqual(recommendations[floor]);
+		});
     })
+    
 
 })
 
