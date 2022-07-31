@@ -48,7 +48,26 @@ describe("Unit tests", ()=>{
     })
 
     describe("Upvote", ()=>{
+        it("should upvote recommendation", async ()=>{
+            const recommendation = await recommendationFactory.createRecomendation();
+            const spy = jest
+                        .spyOn(recommendationRepository, 'find')
+                        .mockImplementationOnce((): any => recommendation);
+            jest.spyOn(recommendationRepository,'updateScore')
+                        .mockImplementationOnce((): any => {});
+            await recommendationService.upvote(recommendation.id);
+            expect(spy).toBeCalledWith(recommendation.id);
+        })
 
+        it("should throw error if recommendation does not exist", async ()=>{
+            jest.spyOn(recommendationRepository, 'find')
+                        .mockImplementationOnce((): any => {});
+            jest.spyOn(recommendationRepository,'updateScore')
+                        .mockImplementationOnce((): any => {});
+            const fakeId = faker.datatype.number({max: 0});
+            const upvote = await recommendationService.upvote(fakeId);
+            expect(upvote).rejects.toEqual({ type: 'not_found', message: '' });
+        })
     })
 
     describe("Downvote", ()=>{
