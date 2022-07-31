@@ -160,6 +160,32 @@ describe("Unit tests", ()=>{
     })
 
     describe("Get by id", ()=>{
+        it('should call function find in recommendations repository', async () => {
+			const recommendation = await recommendationFactory.createRecomendation();
+			const spy = jest
+				.spyOn(recommendationRepository, 'find')
+				.mockImplementationOnce((): any => recommendation);
+
+			const result = await recommendationService.getById(
+				recommendation.id
+			);
+			expect(spy).toHaveBeenCalledWith(recommendation.id);
+			expect(result).not.toBeNull();
+
+         })
+
+         it('should throw error for a not found id', async () => {
+			
+			jest.spyOn(recommendationRepository, 'find').mockImplementationOnce(
+				(): any => {}
+			);
+            const fakeID = faker.datatype.number({ max: 0 });
+			const result = recommendationService.getById(fakeID);
+			expect(result).rejects.toEqual({
+				type: 'not_found',
+				message: '',
+			});
+		});
     })
 
     describe("Get randomic", ()=>{
