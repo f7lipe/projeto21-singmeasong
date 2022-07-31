@@ -2,12 +2,30 @@ import { faker } from "@faker-js/faker";
 
 import { prisma } from "./../../src/database.js";
 import { Recommendation } from "@prisma/client";
-type recommendation = Omit<Recommendation, "id" | "score">;
+import { CreateRecommendationData } from "../../src/services/recommendationsService.js";
 
-export default function createRecoomendation(youtubeLink: string = null){
-    const recommendation: recommendation = {
+export async function createRecomendation(recommendation: Partial<Recommendation>){
+    return prisma.recommendation.create({
+        data: {
+            name: recommendation.name || faker.music.songName(),
+            youtubeLink: recommendation.youtubeLink || `https://www.youtube.com/watch?v=${faker.datatype.uuid()}`,
+            score: recommendation.score || undefined,
+		},
+	});
+};
+
+
+export function createRecommendationData():CreateRecommendationData{
+    return {
         name: faker.music.songName(),
-        youtubeLink: youtubeLink || "http://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        youtubeLink: `https://www.youtube.com/watch?v=${faker.datatype.uuid()}`,
     };
-    return recommendation;
 }
+
+export function loadRecommendation(id: number):Promise<Recommendation>{
+	return prisma.recommendation.findFirst({
+		where: {
+			id,
+		},
+	});
+};
