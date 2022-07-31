@@ -4,7 +4,7 @@ import { prisma } from "./../../src/database.js";
 import { Recommendation } from "@prisma/client";
 import { CreateRecommendationData } from "../../src/services/recommendationsService.js";
 
-export async function createRecomendation(recommendation: Partial<Recommendation>){
+export async function createRecomendation(recommendation: Partial<Recommendation> = {}): Promise<Recommendation>{
     return prisma.recommendation.create({
         data: {
             name: recommendation.name || faker.music.songName(),

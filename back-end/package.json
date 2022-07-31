@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "prisma-prod": "prisma migrate deploy",
-    "prisma-test": "dotenv -e .env.test prisma migrate reset --skip-seed",
-    "test": "npm run prisma-test &&  NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i"
+    "dev:test": "dotenv -e .env.test nodemon src/server.ts",
+		"test:integration": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- --testPathPattern=tests/integrations -i --coverage",
+		"test:unit": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- --testPathPattern=tests/unit -i --coverage",
+		"test": "dotenv -e .env.test prisma migrate dev && NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage",
+		"reset:db": "prisma migrate reset",
+		"reset:db:dev": "dotenv -e .env.test prisma migrate reset"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

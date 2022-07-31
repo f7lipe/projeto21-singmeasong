@@ -3,6 +3,7 @@ import { recommendationRepository } from "../../src/repositories/recommendationR
 import { recommendationService } from "../../src/services/recommendationsService.js"
 import { jest } from "@jest/globals";
 import { cleanDatabase } from "../helper/databaseCleaner.js";
+import * as recommendationFactory from "../factories/recommendationFactory.js";
 
 beforeEach(async () => {
 	await cleanDatabase();
@@ -11,8 +12,38 @@ beforeEach(async () => {
 
 describe("Unit tests", ()=>{
     describe("Create", ()=>{
-        it("should create recommendation with valid info",  ()=>{
-        
+        it("should create recommendation with valid info", async ()=>{
+        const recommendation = recommendationFactory.createRecommendationData();
+        const spy = jest
+                    .spyOn(recommendationRepository, "create")
+                    .mockImplementationOnce(():any => {})
+                    jest.spyOn(recommendationRepository,"findByName").mockImplementationOnce((): any => {});
+                    await recommendationService.insert(recommendation);
+                    expect(spy).toBeCalledWith(recommendation)
+        })
+        it("should call findByName", async ()=>{
+            const recommendation = recommendationFactory.createRecommendationData();
+            const spy = jest
+                        .spyOn(recommendationRepository, 'findByName')
+                        .mockResolvedValue(undefined);
+            jest.spyOn(recommendationRepository,'create')
+                        .mockImplementationOnce((): any => {});
+            await recommendationService.insert(recommendation);
+            expect(spy).toBeCalledWith(recommendation.name);
+        })
+
+        it("should throw error if name is already taken", async ()=>{
+            const recommendation = await recommendationFactory.createRecomendation();
+            jest.spyOn(recommendationRepository, 'findByName')
+                        .mockResolvedValueOnce(recommendation);
+            jest.spyOn(recommendationRepository,'create')
+                        .mockImplementationOnce((): any => {});
+           const insertion = await recommendationService.insert(recommendation)
+           expect(insertion).rejects.toEqual({
+            type: "conflict",
+            message: "Recommendations names must be unique"
+           })
+
         })
     })
 
