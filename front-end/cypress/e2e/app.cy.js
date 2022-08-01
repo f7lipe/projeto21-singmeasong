@@ -44,3 +44,11 @@ describe('Random recommendation suit', () => {
 	});
 });
 
+describe('Top 10 suite', () => {
+	it('should shows the top 10 recommended', () => {
+		cy.visit('http://localhost:3000/top');
+		cy.intercept('GET', '/recommendations/top/10').as('getRecommendations');
+		cy.wait('@getRecommendations');
+		cy.get('article').should('be.length.lte', 10);
+	});
+});
