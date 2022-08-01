@@ -32,10 +32,15 @@ describe("Home suit", ()=>{
 		cy.get('.go-arrow-down-icon').click({ multiple: true });
 	});
 
-    it('should remove a recommendation when click on downvote icon and score is less then -5', () => {
-		_.times(6, () => {
-			cy.get(`#${recommendation.name}`).click({ multiple: true });
-		});
-	});
-
 })
+
+describe('Random recommendation suit', () => {
+	it('should show only one random recommendation', () => {
+		cy.visit('http://localhost:3000/random');
+		cy.intercept('GET', '/recommendations/random').as('getRecommendations');
+		cy.wait('@getRecommendations');
+		cy.get('article').should('have.length', 1);
+		console.log('article', cy.get('article'));
+	});
+});
+
